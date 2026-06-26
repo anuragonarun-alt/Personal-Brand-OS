@@ -1,61 +1,31 @@
 import React from "react";
+import { supabase } from "@/lib/supabase";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PlusIcon, SearchIcon, FilterIcon, EyeIcon } from "@/components/ui/icons";
 
 interface Idea {
+  id: string;
   title: string;
-  desc: string;
-  category: "TWITTER" | "YOUTUBE" | "NEWSLETTER";
-  score: number; // 1-5
-  status: "EVALUATING" | "DRAFTING" | "BACKLOG" | "READY";
-  created: string;
+  content: string | null;
+  category: string | null;
+  status: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export default function IdeasPage() {
-  const ideas: Idea[] = [
-    {
-      title: "The Death of SaaS and the Rise of AI Agents",
-      desc: "Deep dive on how local model hosting and agent platforms will disrupt multi-tenant SaaS architectures.",
-      category: "NEWSLETTER",
-      score: 5,
-      status: "DRAFTING",
-      created: "2026-06-24",
-    },
-    {
-      title: "My 3-step setup for local terminal automation",
-      desc: "Short thread breaking down my shell shortcuts and productivity aliases.",
-      category: "TWITTER",
-      score: 4,
-      status: "READY",
-      created: "2026-06-23",
-    },
-    {
-      title: "Building an Antigravity replica in React from scratch",
-      desc: "Video breakdown of rendering complex system logs, canvas diagrams, and interactive state models.",
-      category: "YOUTUBE",
-      score: 5,
-      status: "EVALUATING",
-      created: "2026-06-22",
-    },
-    {
-      title: "Why shadows are ruining your modern UI design",
-      desc: "Visual critique on Polymarket and Linear border styles vs generic SaaS drop shadows.",
-      category: "TWITTER",
-      score: 3,
-      status: "BACKLOG",
-      created: "2026-06-20",
-    },
-    {
-      title: "The Creator Operating System: Behind the Scenes",
-      desc: "Sharing my design assets, Next.js architecture, and automated dashboard scripts.",
-      category: "NEWSLETTER",
-      score: 4,
-      status: "EVALUATING",
-      created: "2026-06-18",
-    },
-  ];
+export default async function IdeasPage() {
+  const { data: ideas, error } = await supabase
+    .from("ideas")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+  }
+
 
   const getScoreBlocks = (score: number) => {
     return (
@@ -144,7 +114,7 @@ export default function IdeasPage() {
 
       {/* Ideas Card List */}
       <div className="space-y-3">
-        {ideas.map((idea) => (
+        {(ideas ?? []).map((idea) => (
           <Card
             key={`idea-${idea.title}`}
             hoverable
@@ -156,7 +126,7 @@ export default function IdeasPage() {
                   {getCategoryBadge(idea.category)}
                   <span className="w-1.5 h-1.5 rounded-full bg-edge-strong hidden sm:inline" />
                   <span className="font-mono text-[10px] text-subtle">
-                    {idea.created}
+                    {new Date(idea.created_at).toLocaleDateString()}
                   </span>
                 </div>
                 <div>
@@ -164,7 +134,7 @@ export default function IdeasPage() {
                     {idea.title}
                   </h3>
                   <p className="text-xs text-muted leading-relaxed mt-0.5 max-w-4xl">
-                    {idea.desc}
+                    {idea.content}
                   </p>
                 </div>
               </div>
@@ -173,7 +143,7 @@ export default function IdeasPage() {
               <div className="flex items-center gap-6 self-start sm:self-center shrink-0">
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-[9px] font-mono text-subtle">SIGNAL</span>
-                  <div className="text-accent">{getScoreBlocks(idea.score)}</div>
+                  <div className="text-accent">{getScoreBlocks(3)}</div>
                 </div>
                 <div className="w-px h-8 bg-edge hidden sm:block" />
                 <div className="flex flex-col items-end gap-1">
