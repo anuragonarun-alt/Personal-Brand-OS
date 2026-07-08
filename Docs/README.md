@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Brand OS (PB.OS)
 
-## Getting Started
+> A personal operating system for creators.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Overview
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Personal Brand OS is a dashboard that brings every part of a creator's workflow into one place.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Instead of switching between dozens of websites and tools, PB.OS aims to become the single interface for managing a personal brand.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The project is being built for one user first:
 
-## Learn More
+Me.
 
-To learn more about Next.js, take a look at the following resources:
+Only after it becomes an essential daily tool will it be expanded into a SaaS for other creators.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Vision
 
-## Deploy on Vercel
+PB.OS should become the first tab I open every morning.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+It should allow me to:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Capture ideas
+- Save inspiration
+- Manage content
+- Schedule publishing
+- Monitor analytics
+- Review growth
+- Connect creator tools
+- Make better decisions
+
+without constantly switching between platforms.
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+### Backend
+
+- Supabase
+
+### Deployment
+
+- Vercel
+
+### Version Control
+
+- GitHub
+
+---
+
+## Documentation
+
+Project documentation lives inside the `/Docs` folder.
+
+Important files:
+
+- PRODUCT.md
+- PRODUCT_IDENTITY.md
+- PROJECT_ARCHITECTURE.md
+- ROADMAP.md
+- PROJECT_LOG.md
+- VISUAL_SYSTEM.md
+
+---
+
+## Current Status
+
+The project is under active development.
+
+Current priorities:
+
+- Authentication
+- Idea Vault
+- Content Pipeline
+- Analytics
+- Decision Engine
+
+---
+
+## Guiding Principle
+
+PB.OS is not being built to sell.
+
+It is being built to solve real problems in my own creator workflow.
+
+If it becomes something I genuinely cannot live without, it becomes a product worth selling.
+
+Usefulness comes first.
+
+Everything else comes later.

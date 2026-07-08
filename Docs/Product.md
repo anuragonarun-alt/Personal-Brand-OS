@@ -1,264 +1,239 @@
 # Personal Brand OS
 
-## Vision
+## What is Personal Brand OS?
 
-Personal Brand OS is a SaaS platform designed to help creators manage their entire content workflow from a single dashboard.
+Personal Brand OS (PB.OS) is a personal operating system for creators.
 
-The goal is to eliminate the need to switch between multiple tools for ideas, content management, and growth tracking.
+It is not just another productivity app.
 
-A creator should be able to:
+It is a single place to think, capture, create, publish, analyze, and improve every part of a personal brand.
 
-* Capture ideas
-* Organize content
-* Track progress
-* Monitor growth
+The goal is simple:
 
-from one place.
+Replace dozens of disconnected tools with one intelligent operating system.
 
----
+PB.OS is being built for myself first.
 
-## Problem
-
-Most creators have a fragmented workflow.
-
-Example:
-
-* Ideas are stored in Notes apps
-* Drafts are stored in Docs
-* Content plans are stored in spreadsheets
-* Analytics are stored inside social media platforms
-
-As a result:
-
-* Ideas get lost
-* Content becomes difficult to organize
-* Progress becomes difficult to measure
-* Growth becomes difficult to track
-
-The creator spends more time managing tools than creating content.
+If it becomes something I genuinely cannot work without, it will become a product for everyone else.
 
 ---
 
-## Solution
+# Vision
 
-Personal Brand OS provides a unified workspace that allows creators to:
+Modern creators constantly switch between different applications.
 
-### Capture
+Ideas live in Notes.
 
-Store content ideas and inspiration.
+Drafts live in Google Docs.
 
-### Organize
+Analytics live inside social platforms.
 
-Move content through a structured workflow.
+Inspiration is scattered across bookmarks, screenshots, Twitter likes, YouTube playlists, and saved posts.
 
-### Execute
+Publishing requires jumping between multiple websites.
 
-Track what content is ready, published, or still in progress.
+As a result, creators spend more time managing tools than creating.
 
-### Analyze
+PB.OS exists to eliminate that problem.
 
-Measure growth and performance over time.
-
----
-
-## Target User
-
-Primary User:
-
-* Solo creators
-* Personal brands
-* Indie hackers
-* Founders building in public
-
-Secondary User:
-
-* Coaches
-* Consultants
-* Freelancers
-* Small creator teams
+Everything required to operate a personal brand should exist inside one dashboard.
 
 ---
 
-## MVP Goals
+# Core Philosophy
 
-The MVP should solve one problem:
+PB.OS is built around one idea:
 
-Help creators organize ideas, manage content, and track growth.
+> Everything about a creator's business should be manageable from a single operating system.
 
-The MVP does NOT need:
+The software should reduce decisions, remove friction, and make consistent publishing easier.
 
-* AI writing
-* AI content generation
-* AI agents
-* Competitor tracking
-* Team collaboration
+Every feature should answer one question:
 
-Those can be added later.
+"Does this make managing my personal brand faster, easier, or smarter?"
+
+If not, it doesn't belong.
 
 ---
 
-# MVP Features (V1)
+# Primary User
 
-## 1. Authentication
+The first user is me.
 
-Purpose:
+Every feature must solve a real problem I experience while building my own personal brand.
 
-Allow users to create accounts and securely access their data.
+Only after PB.OS becomes part of my daily workflow will it be expanded into a SaaS for other creators.
 
-Features:
+Future users include:
 
-* Sign Up
-* Sign In
-* Sign Out
-
----
-
-## 2. Idea Vault
-
-Purpose:
-
-Store content ideas.
-
-Features:
-
-* Create idea
-* Edit idea
-* Delete idea
-* Search ideas
-* Tag ideas
+- Creators
+- Entrepreneurs
+- Founders
+- Indie Hackers
+- Coaches
+- Consultants
+- Freelancers
 
 ---
 
-## 3. Content Pipeline
+# Product Goals
 
-Purpose:
+PB.OS should become the place where I can:
 
-Track content progress.
+- Capture ideas
+- Save inspiration
+- Manage content
+- Schedule publishing
+- Review analytics
+- Monitor growth
+- Track goals
+- Connect social platforms
+- Connect creator tools
+- Make faster decisions
 
-Stages:
-
-* Idea
-* Drafting
-* Ready
-* Published
-
-Features:
-
-* Move content between stages
-* View content status
-* Organize workflow
+Without leaving the application.
 
 ---
 
-## 4. Analytics Dashboard
+# Design Principles
 
-Purpose:
+PB.OS should feel like:
 
-Track creator growth.
+- an operating system
+- mission control
+- creator intelligence platform
+- command center
 
-Metrics:
+It should never feel like:
 
-* Followers
-* Engagement
-* Impressions
-* Posts published
-
-Initial MVP may use manual data entry if platform APIs are unavailable.
-
----
-
-# V2 Features
-
-These are important but not required for launch.
-
-## Hook Library
-
-Store high-performing hooks.
-
-## Content Calendar
-
-Plan future content.
-
-## Knowledge Base
-
-Store insights and content resources.
-
-## Growth Insights
-
-Identify content patterns and trends.
+- a note-taking app
+- a project manager
+- a generic SaaS dashboard
+- another Notion clone
 
 ---
 
-# V3 Features
+# Product Pillars
 
-Advanced features after validation.
+## 1. Capture
 
-## AI Brand Coach
+Store everything worth remembering.
 
-Provide content recommendations.
+Examples:
 
-## AI Growth Suggestions
-
-Suggest actions to improve performance.
-
-## Competitor Tracking
-
-Track similar creators.
-
-## Content Repurposing
-
-Convert content into multiple formats.
+- ideas
+- tweets
+- screenshots
+- videos
+- hooks
+- inspiration
+- research
 
 ---
 
-# Success Criteria
+## 2. Create
 
-The MVP is successful if a creator can:
+Turn ideas into published content.
 
-1. Create an account
-2. Save an idea
-3. Manage content through a pipeline
-4. Track growth metrics
+Examples:
 
-without using multiple tools.
-
----
-
-# Non-Goals
-
-The following are NOT priorities for MVP:
-
-* Mobile application
-* Team collaboration
-* Complex permissions
-* Marketplace
-* AI content generation
-* Enterprise features
-
-These can be evaluated after launch.
+- drafts
+- content pipeline
+- publishing
+- scheduling
 
 ---
 
-# Build Philosophy
+## 3. Analyze
 
-* MVP first
-* Ship quickly
-* Learn through building
-* Keep architecture simple
-* Avoid premature optimization
-* Prioritize usability over complexity
+Understand what is working.
+
+Examples:
+
+- platform analytics
+- post performance
+- growth trends
+- engagement
+- reach
+
+---
+
+## 4. Decide
+
+Help me decide what to do next.
+
+Eventually PB.OS should answer questions like:
+
+- What should I post today?
+- Which platform needs attention?
+- Which ideas deserve execution?
+- Which content is performing best?
+- What is slowing my growth?
+
+The goal is not just storing information.
+
+The goal is helping make better decisions.
+
+---
+
+# Product Evolution
+
+## Phase 1
+
+Build an operating system for myself.
+
+The software only needs one happy user.
+
+Me.
+
+---
+
+## Phase 2
+
+Refine the workflow.
+
+Remove friction.
+
+Improve speed.
+
+Replace more external tools.
+
+---
+
+## Phase 3
+
+Open the platform to other creators.
+
+Because every decision from Day 1 considered scalability, supporting multiple users will be an extension—not a rebuild.
 
 ---
 
 # Long-Term Vision
 
-Personal Brand OS becomes the operating system for creators.
+Eventually PB.OS becomes the operating system creators open every morning.
 
-A single place to:
+Instead of checking:
 
-* Think
-* Plan
-* Create
-* Publish
-* Analyze
-* Grow
+- Instagram
+- X
+- LinkedIn
+- YouTube Studio
+- Notes
+- Google Docs
+- Analytics dashboards
+
+They open PB.OS.
+
+Everything they need is already there.
+
+That is the goal.
+
+---
+
+# Success Metric
+
+The project succeeds when I naturally choose PB.OS over every other tool because it genuinely makes running my personal brand easier.
+
+Revenue comes after usefulness.
+
+Not before.

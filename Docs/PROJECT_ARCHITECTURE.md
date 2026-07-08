@@ -2,328 +2,296 @@
 
 ## Purpose
 
-This document defines the architecture, coding standards, and development rules for Personal Brand OS.
+This document defines how Personal Brand OS is built.
 
-All AI agents working on this project must read this file before making changes.
+It exists to keep both humans and AI agents building the project in a consistent way.
+
+The objective is simple:
+
+Build an operating system—not a collection of pages.
+
+---
+
+# Architecture Philosophy
+
+PB.OS is composed of independent modules.
+
+Each module solves one problem.
+
+Together they create one connected operating system.
+
+Every module should be able to:
+
+- work independently
+- communicate with other modules
+- share data through Supabase
+- reuse common UI components
+
+The project should never become a giant monolith.
 
 ---
 
 # Tech Stack
 
-Frontend:
+Frontend
 
-* Next.js
-* React
-* TypeScript
-* Tailwind CSS
+- Next.js (App Router)
+- React
+- TypeScript
+- TailwindCSS
 
-Backend:
+Backend
 
-* Supabase
+- Supabase
+    - Database
+    - Authentication
+    - Storage
+    - Realtime (future)
 
-Hosting:
+Deployment
 
-* Vercel
+- Vercel
 
-Version Control:
+Version Control
 
-* GitHub
-
----
-
-# Architecture Principles
-
-## 1. Keep It Simple
-
-Prefer simple solutions over complex solutions.
-
-Do not introduce additional libraries unless necessary.
+- Git
+- GitHub
 
 ---
 
-## 2. MVP First
+# Core Architecture
 
-Current objective:
+PB.OS has four layers.
 
-Launch the MVP as quickly as possible.
+## Layer 1 — UI
 
-Avoid:
+Everything the user sees.
 
-* Premature optimization
-* Unnecessary abstractions
-* Over-engineering
+Examples
+
+- Sidebar
+- Cards
+- Tables
+- Buttons
+- Analytics widgets
+- Charts
+
+Rule
+
+UI never talks directly to databases unless required.
 
 ---
 
-## 3. Build Feature By Feature
+## Layer 2 — Features
 
-Complete one feature before starting another.
+Business logic.
 
-Example:
+Examples
 
-Authentication
-↓
-Idea Vault
-↓
-Content Pipeline
-↓
-Analytics
+- Idea Vault
+- Analytics
+- Scheduler
+- Inspiration Library
 
-Not:
+Each feature owns its own components and logic.
 
-Authentication + Analytics + AI + Calendar simultaneously.
+---
+
+## Layer 3 — Integrations
+
+Everything that connects PB.OS to external services.
+
+Examples
+
+- Supabase
+- Instagram API
+- X API
+- YouTube API
+- LinkedIn API
+- Slack
+- Notion
+
+Every external connection belongs here.
+
+---
+
+## Layer 4 — Database
+
+Persistent storage.
+
+Examples
+
+- ideas
+- users
+- inspirations
+- analytics
+- settings
+- content
+
+The database should be platform-agnostic.
+
+Features should never depend on one specific social platform.
+
+---
+
+# Development Rules
+
+## Rule 1
+
+Build for one user.
+
+Scale for many.
+
+Never sacrifice simplicity today because of imaginary future problems.
+
+---
+
+## Rule 2
+
+Every feature must solve a real problem.
+
+No "cool" features.
+
+No vanity features.
+
+No unnecessary AI.
+
+---
+
+## Rule 3
+
+Build vertically.
+
+Finish one complete workflow before starting another.
+
+Bad:
+
+20 pages that do nothing.
+
+Good:
+
+One page that completely solves one problem.
+
+---
+
+## Rule 4
+
+Reuse components.
+
+If the same UI appears twice, it should probably become a reusable component.
+
+---
+
+## Rule 5
+
+Every new feature must fit one of the product pillars:
+
+- Capture
+- Create
+- Analyze
+- Decide
+
+If it doesn't fit, question why it exists.
 
 ---
 
 # Folder Structure
 
-```text
+```
 app/
 components/
-features/
 lib/
-types/
+Docs/
+public/
 ```
 
----
+Future additions
 
-# app/
-
-Purpose:
-
-Routing and pages.
-
-Examples:
-
-```text
-app/
-├── page.tsx
-├── dashboard/
-├── ideas/
-├── pipeline/
-├── analytics/
 ```
-
-Rules:
-
-* Keep page files small
-* Do not place large business logic here
-* Use components and features
-
----
-
-# components/
-
-Purpose:
-
-Reusable UI components.
-
-Examples:
-
-```text
-components/
-├── Sidebar.tsx
-├── Header.tsx
-├── Button.tsx
-├── Card.tsx
-```
-
-Rules:
-
-* Reusable across multiple pages
-* UI only
-* No business logic
-
----
-
-# features/
-
-Purpose:
-
-Feature-specific code.
-
-Examples:
-
-```text
 features/
-├── ideas/
-├── pipeline/
-├── analytics/
-```
-
-Rules:
-
-* Keep feature code together
-* Avoid mixing features
-
----
-
-# lib/
-
-Purpose:
-
-Shared utilities and integrations.
-
-Examples:
-
-```text
-lib/
-├── supabase.ts
-├── helpers.ts
-```
-
-Rules:
-
-* Shared logic only
-* No UI
-
----
-
-# types/
-
-Purpose:
-
-TypeScript types.
-
-Examples:
-
-```text
+hooks/
 types/
-├── idea.ts
-├── analytics.ts
+services/
 ```
 
-Rules:
-
-* Store reusable types here
-
----
-
-# Component Rules
-
-Preferred:
-
-Small reusable components.
-
-Bad:
-
-One component with 1000+ lines.
-
-Good:
-
-```text
-Sidebar
-Header
-DashboardCard
-AnalyticsCard
-```
-
-combined together.
-
----
-
-# Naming Conventions
-
-Components:
-
-```text
-Sidebar.tsx
-Header.tsx
-IdeaCard.tsx
-```
-
-Pages:
-
-```text
-page.tsx
-```
-
-Feature folders:
-
-```text
-ideas
-pipeline
-analytics
-```
-
-Use clear names.
-
-Avoid abbreviations.
+Only add folders when they become necessary.
 
 ---
 
 # AI Agent Rules
 
-Before making changes:
+Before writing code, always read:
 
-1. Read PRODUCT.md
-2. Read PROJECT_ARCHITECTURE.md
-3. Read PROJECT_LOG.md
-4. Read ROADMAP.md
+1. README.md
+2. PRODUCT.md
+3. PRODUCT_IDENTITY.md
+4. PROJECT_ARCHITECTURE.md
+5. ROADMAP.md
 
-Then inspect the existing codebase.
+Then inspect the existing code.
 
----
-
-## AI Agents Must Not
-
-* Create duplicate components
-* Create duplicate pages
-* Create duplicate folders
-* Move files without reason
-* Rewrite working code unnecessarily
-* Add large amounts of code to app/page.tsx
+Never assume.
 
 ---
 
-## AI Agents Should
+# AI Agents Should
 
-* Reuse existing components
-* Follow existing patterns
-* Keep files focused
-* Explain significant architectural changes
+- reuse components
+- keep files small
+- explain architectural decisions
+- preserve existing design language
+- prefer simple solutions
+
+---
+
+# AI Agents Must Not
+
+- duplicate components
+- create unnecessary abstractions
+- rewrite working code
+- introduce heavy libraries without reason
+- change visual language
 
 ---
 
 # Git Workflow
 
-After each completed milestone:
+Every meaningful milestone follows the same flow.
 
-```bash
-git add .
-git commit -m "meaningful message"
-git push
-```
+Create feature branch
 
-Examples:
+↓
 
-```bash
-git commit -m "feat: add sidebar"
-git commit -m "feat: add authentication"
-git commit -m "feat: add idea vault"
-```
+Build
 
----
+↓
 
-# Current MVP Scope
+Test locally
 
-Allowed:
+↓
 
-* Authentication
-* Idea Vault
-* Content Pipeline
-* Analytics Dashboard
+Commit
 
-Not Allowed Yet:
+↓
 
-* AI Writer
-* AI Coach
-* Competitor Tracking
-* Team Features
-* Mobile App
+Push
+
+↓
+
+Pull Request
+
+↓
+
+Merge into main
+
+Never develop directly on main.
 
 ---
 
 # Golden Rule
 
-A working simple solution is better than a perfect unfinished solution.
+PB.OS is an operating system.
+
+Every commit should make the operating system more useful to its primary user.
+
+Not more impressive.

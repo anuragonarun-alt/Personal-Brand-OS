@@ -1,265 +1,276 @@
 # Personal Brand OS Roadmap
 
-## Purpose
-
-This roadmap defines the planned development phases of Personal Brand OS.
-
-The goal is to maintain focus and avoid scope creep.
-
-New features should only be added if they align with the roadmap.
+> Build the operating system I use every day to run my personal brand.
 
 ---
 
-# Current Status
+# Philosophy
 
-Phase 0 Complete ✅
+The goal is NOT to build the biggest creator platform.
 
-Project initialized and deployed.
+The goal is to build the most useful one.
 
----
+Every phase should solve a real problem that I personally experience.
 
-# Phase 0 — Foundation
-
-Status: Complete ✅
-
-Objectives:
-
-* Create Next.js project
-* Setup Git
-* Setup GitHub
-* Setup Vercel
-* Establish development workflow
-
-Completed:
-
-* Next.js setup
-* Git repository
-* GitHub repository
-* SSH authentication
-* Vercel deployment
-
-Outcome:
-
-A working development environment and deployment pipeline.
+If I don't use a feature regularly, it doesn't belong in V1.
 
 ---
 
-# Phase 1 — Application Shell
+# V0.1 — My Daily Driver
 
-Status: Next
+Goal
 
-Goal:
+Build an operating system I genuinely use every day.
 
-Create the foundation of the user interface.
+This version only needs one happy user.
 
-Features:
-
-* Sidebar navigation
-* Dashboard page
-* Ideas page
-* Pipeline page
-* Analytics page
-* Settings page
-
-Deliverables:
-
-* Layout system
-* Navigation system
-* Reusable UI structure
-
-Success Criteria:
-
-User can navigate the application.
-
-No backend required.
+Me.
 
 ---
 
-# Phase 2 — Authentication
+## Mission Control
 
-Goal:
+The home screen.
 
-Allow users to create and access accounts.
+Daily Brief
 
-Features:
+Weekly Goals
 
-* Sign Up
-* Sign In
-* Sign Out
-* Protected routes
+Tasks
 
-Tech:
+Quick Actions
 
-* Supabase Authentication
+Recent Activity
 
-Success Criteria:
+Growth Snapshot
 
-Users can securely access their own workspace.
+Recommendations (future)
 
 ---
 
-# Phase 3 — Idea Vault
+## Content
 
-Goal:
+Idea Vault
 
-Create a central place for storing ideas.
+Inspiration Library
 
-Features:
+Content Pipeline
 
-* Create idea
-* Edit idea
-* Delete idea
-* Search ideas
-* Tags
+Draft Manager
 
-Database:
-
-Ideas Table
-
-Success Criteria:
-
-Users can manage content ideas.
+Content Calendar (basic)
 
 ---
 
-# Phase 4 — Content Pipeline
+## Growth
 
-Goal:
+Manual Analytics
 
-Help creators organize content production.
+Weekly Review
 
-Pipeline Stages:
+Monthly Review
 
-* Idea
-* Drafting
-* Ready
-* Published
+Goal Tracking
 
-Features:
-
-* Move content between stages
-* Track status
-* View progress
-
-Success Criteria:
-
-Creators can manage content workflow visually.
+Platform Health
 
 ---
 
-# Phase 5 — Analytics Dashboard
+## Settings
 
-Goal:
+Authentication
 
-Track creator growth.
+User Profile
 
-Features:
+Preferences
 
-* Followers
-* Engagement
-* Impressions
-* Published content metrics
-
-MVP Approach:
-
-Manual data entry if platform APIs are unavailable.
-
-Future:
-
-API integrations.
-
-Success Criteria:
-
-Creators can measure growth over time.
+Platform Connections (future)
 
 ---
 
-# Phase 6 — MVP Polish
+# V1 — Early Access
 
-Goal:
+Goal
 
-Prepare for launch.
+Open PB.OS to other creators.
 
-Tasks:
+Features
 
-* Fix bugs
-* Improve UI
-* Improve UX
-* Improve responsiveness
-* Improve navigation
-
-Success Criteria:
-
-Stable MVP ready for real users.
+- Multi-user support
+- Public authentication
+- Search
+- Notifications
+- Better settings
+- Dashboard customization
 
 ---
 
-# MVP Launch
+# V2 — Creator Platform
 
-Goal:
+Goal
 
-Release Personal Brand OS publicly.
+Replace creator workflows.
 
-Launch Checklist:
+Modules
 
-* Authentication works
-* Idea Vault works
-* Content Pipeline works
-* Analytics works
-* No critical bugs
+- Auto Publishing
+- Gmail Integration
+- Google Calendar
+- Google Drive
+- Slack
+- Sponsor CRM
+- Revenue Tracking
+- Knowledge Base
 
-Success Criteria:
+Decision Engine
 
-At least one creator can use the product end-to-end.
-
----
-
-# V2
-
-Only after MVP validation.
-
-Potential Features:
-
-* Hook Library
-* Content Calendar
-* Knowledge Base
-* Growth Insights
+- Best posting time
+- Weekly reports
+- Growth insights
+- AI recommendations
 
 ---
 
-# V3
+# V3 — Creator Operating System
 
-Advanced features.
+Goal
 
-Potential Features:
+Replace the browser.
 
-* AI Brand Coach
-* AI Growth Recommendations
-* Competitor Tracking
-* Content Repurposing
+Everything important starts inside PB.OS.
 
----
+Modules
 
-# Features Explicitly Excluded From MVP
+- AI Assistant
+- Cross-platform analytics
+- Automation workflows
+- Plugin system
+- Team workspaces
+- Creator CRM
+- API integrations
 
-Do Not Build Yet:
-
-* Mobile App
-* Team Collaboration
-* Marketplace
-* Advanced Permissions
-* AI Writer
-* AI Content Generator
-* AI Agents
-
-Reason:
-
-Focus on shipping.
+Mission Control becomes the creator's home screen.
 
 ---
 
-# Guiding Principle
+# Development Order
 
-Finish the current phase before starting the next phase.
+The build order follows workflows, not pages.
 
-A completed MVP is more valuable than a half-built platform.
+## Phase 0
+
+Foundation
+
+✅ UI
+
+✅ Git
+
+✅ GitHub
+
+✅ Vercel
+
+✅ Supabase
+
+✅ Database
+
+---
+
+## Phase 1
+
+Idea Vault
+
+Create
+
+Read
+
+Update
+
+Delete
+
+---
+
+## Phase 2
+
+Content Pipeline
+
+Workflow
+
+Drafts
+
+Publishing
+
+Calendar
+
+---
+
+## Phase 3
+
+Mission Control
+
+Daily Brief
+
+Tasks
+
+Goals
+
+Activity
+
+Weekly Review
+
+---
+
+## Phase 4
+
+Authentication
+
+Multi-user support
+
+Settings
+
+Profiles
+
+---
+
+## Phase 5
+
+Platform Integrations
+
+Instagram
+
+X
+
+LinkedIn
+
+YouTube
+
+Google Calendar
+
+Drive
+
+Slack
+
+---
+
+## Phase 6
+
+Decision Engine
+
+Insights
+
+Recommendations
+
+Predictions
+
+Automation
+
+---
+
+# Definition of Success
+
+PB.OS becomes the first application I open every morning.
+
+If it disappeared tomorrow, I would immediately miss it.
+
+That is the first milestone.
+
+Revenue comes later.
