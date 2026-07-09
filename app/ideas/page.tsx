@@ -3,7 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PlusIcon, SearchIcon, FilterIcon, EyeIcon } from "@/components/ui/icons";
+import { SearchIcon, FilterIcon, EyeIcon } from "@/components/ui/icons";
+import { IdeaVaultActions } from "@/components/idea-vault/idea-vault-actions";
 
 interface Idea {
   id: string;
@@ -66,12 +67,7 @@ export default async function IdeasPage() {
       <PageHeader
         title="Idea Vault"
         description="Capture, analyze, and score content concepts with signal filters."
-        actions={
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-foreground hover:bg-[#ccc] text-background text-xs font-semibold font-sans transition-all">
-            <PlusIcon size={12} className="stroke-[2]" />
-            <span>New Concept</span>
-          </button>
-        }
+        actions={<IdeaVaultActions />}
       />
 
       {/* Filter and Stats Bar */}
@@ -116,7 +112,7 @@ export default async function IdeasPage() {
       <div className="space-y-3">
         {(ideas ?? []).map((idea) => (
           <Card
-            key={`idea-${idea.title}`}
+            key={idea.id}
             hoverable
             className="group"
           >
