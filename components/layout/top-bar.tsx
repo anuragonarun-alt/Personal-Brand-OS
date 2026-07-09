@@ -11,10 +11,13 @@ export const TopBar: React.FC = () => {
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      // Format: YYYY-MM-DD HH:MM:SS UTC
-      const datePart = now.toISOString().split("T")[0];
-      const timePart = now.toISOString().split("T")[1].substring(0, 8);
-      setTimeStr(`${datePart} ${timePart} UTC`);
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      setTimeStr(`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`);
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
@@ -54,9 +57,9 @@ export const TopBar: React.FC = () => {
 
       {/* Clock and Live Status */}
       <div className="flex items-center gap-4">
-        {/* UTC Time */}
+        {/* Local Time */}
         <div className="font-mono text-[10px] text-muted tracking-tight tabular-nums hidden sm:block">
-          {timeStr || "0000-00-00 00:00:00 UTC"}
+          {timeStr || "0000-00-00 00:00:00"}
         </div>
 
         {/* Separator */}
