@@ -27,6 +27,11 @@ export default async function IdeasPage() {
   }
 
 
+  const ideasList = ideas ?? [];
+  const totalCount = ideasList.length;
+  const highPriorityCount = ideasList.filter((idea) => idea.priority === "HIGH").length;
+  const readyCount = ideasList.filter((idea) => idea.status === "READY").length;
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -61,21 +66,21 @@ export default async function IdeasPage() {
         {/* Dense Status Counts */}
         <div className="flex items-center gap-4 font-mono text-[10px] text-muted">
           <div>
-            TOTAL: <span className="text-foreground font-semibold">142</span>
+            TOTAL: <span className="text-foreground font-semibold">{totalCount}</span>
           </div>
           <div className="w-px h-3 bg-edge" />
           <div>
-            HIGH SIGNAL: <span className="text-accent font-semibold">34</span>
+            HIGH PRIORITY: <span className="text-accent font-semibold">{highPriorityCount}</span>
           </div>
           <div className="w-px h-3 bg-edge" />
           <div>
-            READY: <span className="text-success font-semibold">12</span>
+            READY: <span className="text-success font-semibold">{readyCount}</span>
           </div>
         </div>
       </div>
 
       {/* Ideas Card List */}
-      <IdeaVaultList ideas={ideas ?? []} />
+      <IdeaVaultList ideas={ideasList} />
     </div>
   );
 }
