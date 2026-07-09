@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Idea } from "@/app/ideas/page";
+import { Idea, extractErrorMessage } from "@/lib/types";
 import { CategorySelect } from "@/components/ui/category-select";
+import { useToast } from "@/components/ui/toast";
+import { DeleteConfirmOverlay } from "./delete-confirm-overlay";
 
 interface CreateIdeaModalProps {
   isOpen: boolean;
@@ -12,27 +14,37 @@ interface CreateIdeaModalProps {
   initialIdea?: Idea | null;
 }
 
+const DEFAULT_FORM_VALUES = {
+  title: "",
+  description: "",
+  category: "TWITTER",
+  status: "BACKLOG",
+  priority: "MEDIUM",
+};
+
 export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
   isOpen,
   onClose,
   initialIdea = null,
 }) => {
   const router = useRouter();
+  const { addToast } = useToast();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("TWITTER");
-  const [status, setStatus] = useState("BACKLOG");
-  const [priority, setPriority] = useState("MEDIUM");
+  const [title, setTitle] = useState(DEFAULT_FORM_VALUES.title);
+  const [description, setDescription] = useState(DEFAULT_FORM_VALUES.description);
+  const [category, setCategory] = useState(DEFAULT_FORM_VALUES.category);
+  const [status, setStatus] = useState(DEFAULT_FORM_VALUES.status);
+  const [priority, setPriority] = useState(DEFAULT_FORM_VALUES.priority);
+
+  const titleRef = useRef<HTMLInputElement>(null);
+  const isSubmittingRef = useRef(false);
+  const isDeletingRef = useRef(false);
 
   const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Deletion States
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteSuccess, setDeleteSuccess] = useState(false);
-  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null);
 
   // Synchronize form states for editing vs creation
   useEffect(() => {
@@ -40,21 +52,21 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
       if (initialIdea) {
         setTitle(initialIdea.title);
         setDescription(initialIdea.content || "");
-        setCategory(initialIdea.category || "TWITTER");
-        setStatus(initialIdea.status || "BACKLOG");
-        setPriority(initialIdea.priority || "MEDIUM");
+        setCategory(initialIdea.category || DEFAULT_FORM_VALUES.category);
+        setStatus(initialIdea.status || DEFAULT_FORM_VALUES.status);
+        setPriority(initialIdea.priority || DEFAULT_FORM_VALUES.priority);
       } else {
-        setTitle("");
-        setDescription("");
-        setCategory("TWITTER");
-        setStatus("BACKLOG");
-        setPriority("MEDIUM");
+        setTitle(DEFAULT_FORM_VALUES.title);
+        setDescription(DEFAULT_FORM_VALUES.description);
+        setCategory(DEFAULT_FORM_VALUES.category);
+        setStatus(DEFAULT_FORM_VALUES.status);
+        setPriority(DEFAULT_FORM_VALUES.priority);
       }
-      setErrorMessage(null);
       setShowDeleteConfirm(false);
       setIsDeleting(false);
-      setDeleteSuccess(false);
-      setDeleteErrorMessage(null);
+      isSubmittingRef.current = false;
+      isDeletingRef.current = false;
+      requestAnimationFrame(() => titleRef.current?.focus());
     }
   }, [isOpen, initialIdea]);
 
@@ -88,16 +100,15 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
   if (!isOpen) return null;
 
   const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setCategory("TWITTER");
-    setStatus("BACKLOG");
-    setPriority("MEDIUM");
-    setErrorMessage(null);
+    setTitle(DEFAULT_FORM_VALUES.title);
+    setDescription(DEFAULT_FORM_VALUES.description);
+    setCategory(DEFAULT_FORM_VALUES.category);
+    setStatus(DEFAULT_FORM_VALUES.status);
+    setPriority(DEFAULT_FORM_VALUES.priority);
     setShowDeleteConfirm(false);
     setIsDeleting(false);
-    setDeleteSuccess(false);
-    setDeleteErrorMessage(null);
+    isSubmittingRef.current = false;
+    isDeletingRef.current = false;
   };
 
   const handleClose = () => {
@@ -108,13 +119,14 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingRef.current) return;
     if (!title.trim()) {
-      setErrorMessage("Title is required.");
+      addToast("Title is required.", "error");
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSaving(true);
-    setErrorMessage(null);
 
     try {
       if (initialIdea) {
@@ -146,7 +158,6 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
           category,
           status,
           priority,
-          user_id: null,
         });
 
         if (error) {
@@ -154,23 +165,30 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
         }
       }
 
+      addToast(
+        initialIdea ? "Concept updated successfully." : "Concept created successfully.",
+        "success"
+      );
       resetForm();
       router.refresh();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error saving concept:", err);
-      setErrorMessage(
-        err?.message || "An unexpected error occurred while saving the concept."
+      addToast(
+        extractErrorMessage(err, "An unexpected error occurred while saving the concept."),
+        "error"
       );
     } finally {
       setIsSaving(false);
+      isSubmittingRef.current = false;
     }
   };
 
   const handleDelete = async () => {
     if (!initialIdea) return;
+    if (isDeletingRef.current) return;
+    isDeletingRef.current = true;
     setIsDeleting(true);
-    setDeleteErrorMessage(null);
 
     try {
       // Delete concept row and verify deletion count
@@ -188,19 +206,19 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
         throw new Error("Deletion failed. You may not have permission to delete this concept.");
       }
 
-      setDeleteSuccess(true);
-      setTimeout(() => {
-        resetForm();
-        router.refresh();
-        onClose();
-      }, 1200);
-    } catch (err: any) {
+      addToast("Concept deleted successfully.", "success");
+      resetForm();
+      router.refresh();
+      onClose();
+    } catch (err: unknown) {
       console.error("Error deleting concept:", err);
-      setDeleteErrorMessage(
-        err?.message || "An unexpected error occurred while deleting the concept."
+      addToast(
+        extractErrorMessage(err, "An unexpected error occurred while deleting the concept."),
+        "error"
       );
     } finally {
       setIsDeleting(false);
+      isDeletingRef.current = false;
     }
   };
 
@@ -214,113 +232,12 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
       }}
     >
       <div className="w-full max-w-lg bg-surface border border-edge rounded-xl shadow-2xl flex flex-col overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
-        {/* Deletion Confirmation Overlay */}
         {showDeleteConfirm && (
-          <div className="absolute inset-0 bg-background/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200">
-            {deleteSuccess ? (
-              <div className="space-y-3 flex flex-col items-center animate-in zoom-in-95 duration-200">
-                <div className="w-12 h-12 rounded-full bg-success/10 border border-success/30 flex items-center justify-center text-success">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-                <h3 className="font-mono text-xs font-bold uppercase text-success tracking-widest animate-pulse">
-                  DELETION_SUCCESSFUL
-                </h3>
-                <p className="text-[11px] text-muted max-w-xs font-sans leading-relaxed">
-                  The concept has been permanently removed from the Idea Vault.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4 flex flex-col items-center w-full max-w-sm">
-                <div className="w-12 h-12 rounded-full bg-danger/10 border border-danger/30 flex items-center justify-center text-danger">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 6h18" />
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  </svg>
-                </div>
-                <div className="space-y-1.5">
-                  <h3 className="font-mono text-xs font-bold uppercase text-danger tracking-widest">
-                    CONFIRM_DELETE_SEQUENCE
-                  </h3>
-                  <p className="text-[11px] text-muted font-sans leading-relaxed">
-                    This action is permanent and <span className="text-foreground font-semibold">cannot be undone</span>. The concept details and outline will be destroyed.
-                  </p>
-                </div>
-
-                {deleteErrorMessage && (
-                  <div className="w-full bg-danger/5 border border-danger/20 rounded-lg p-2.5 text-[11px] text-danger font-medium text-left font-sans">
-                    {deleteErrorMessage}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 w-full pt-2 select-none">
-                  <button
-                    type="button"
-                    disabled={isDeleting}
-                    onClick={() => {
-                      setShowDeleteConfirm(false);
-                      setDeleteErrorMessage(null);
-                    }}
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-edge bg-transparent hover:bg-surface-2 text-xs text-muted hover:text-foreground font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isDeleting}
-                    onClick={handleDelete}
-                    className="flex-1 px-3 py-1.5 rounded-lg bg-danger hover:bg-danger/80 text-foreground text-xs font-semibold font-sans transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-                  >
-                    {isDeleting && (
-                      <svg
-                        className="animate-spin h-3.5 w-3.5 text-foreground"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                    )}
-                    <span>{isDeleting ? "Deleting..." : "Confirm Delete"}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <DeleteConfirmOverlay
+            isDeleting={isDeleting}
+            onCancel={() => setShowDeleteConfirm(false)}
+            onConfirm={handleDelete}
+          />
         )}
 
         {/* Modal Header */}
@@ -355,15 +272,17 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
         </div>
 
         {/* Modal Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="p-5 space-y-4 max-h-[calc(100vh-10rem)] overflow-y-auto">
-            {/* Error Message */}
-            {errorMessage && (
-              <div className="bg-danger/5 border border-danger/20 rounded-lg p-3 text-xs text-danger font-medium font-sans">
-                {errorMessage}
-              </div>
-            )}
-
+        <form
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+              e.preventDefault();
+              e.currentTarget.requestSubmit();
+            }
+          }}
+          className="flex flex-col"
+        >
+          <div className="p-6 space-y-5 max-h-[calc(100vh-10rem)] overflow-y-auto">
             {/* Title Input */}
             <div className="space-y-1.5">
               <label
@@ -373,6 +292,7 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
                 Concept Title <span className="text-accent">*</span>
               </label>
               <input
+                ref={titleRef}
                 id="idea-title"
                 type="text"
                 required
@@ -380,7 +300,7 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. 10 Mistakes I Made in my First Year of Coding"
-                className="w-full bg-background border border-edge rounded-lg px-3 py-2 text-xs text-foreground placeholder-subtle focus:outline-none focus:border-muted font-sans transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-background border border-edge rounded-lg px-3.5 py-2.5 text-xs text-foreground placeholder-subtle focus:outline-none focus:border-muted font-sans transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -399,12 +319,12 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Outline the core concepts, references, and messaging..."
                 rows={5}
-                className="w-full bg-background border border-edge rounded-lg px-3 py-2 text-xs text-foreground placeholder-subtle focus:outline-none focus:border-muted font-sans min-h-[100px] resize-y transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-background border border-edge rounded-lg px-3.5 py-2.5 text-xs text-foreground placeholder-subtle focus:outline-none focus:border-muted font-sans min-h-[100px] resize-y transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
             {/* Metadata Grid (Category, Status, Priority) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-2">
               {/* Category Select */}
               <div className="space-y-1.5">
                 <label
@@ -435,7 +355,7 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
                     disabled={isSaving}
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="w-full bg-background border border-edge rounded-lg px-3 py-2 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-background border border-edge rounded-lg px-3.5 py-2.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="BACKLOG">BACKLOG</option>
                     <option value="EVALUATING">EVALUATING</option>
@@ -474,7 +394,7 @@ export const CreateIdeaModal: React.FC<CreateIdeaModalProps> = ({
                     disabled={isSaving}
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
-                    className="w-full bg-background border border-edge rounded-lg px-3 py-2 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-background border border-edge rounded-lg px-3.5 py-2.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="LOW">LOW</option>
                     <option value="MEDIUM">MEDIUM</option>

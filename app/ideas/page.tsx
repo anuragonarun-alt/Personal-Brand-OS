@@ -4,17 +4,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { IdeaVaultActions } from "@/components/idea-vault/idea-vault-actions";
 import { IdeaVaultList } from "@/components/idea-vault/idea-vault-list";
 
-export interface Idea {
-  id: string;
-  title: string;
-  content: string | null;
-  category: string | null;
-  status: string;
-  priority: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export default async function IdeasPage() {
   const { data: ideas, error } = await supabase
     .from("ideas")

@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { Idea } from "@/app/ideas/page";
+import { useEffect, useRef, useState } from "react";
+import type { Idea } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SearchIcon, FilterIcon } from "@/components/ui/icons";
 import { CreateIdeaModal } from "./create-idea-modal";
+import { IdeaVaultFilters } from "./idea-vault-filters";
+import { SelectChevron } from "@/components/ui/select-chevron";
 
 interface IdeaVaultListProps {
   ideas: Idea[];
@@ -13,6 +15,7 @@ interface IdeaVaultListProps {
 
 export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
 
@@ -25,9 +28,38 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
   // Sorting state
   const [sortBy, setSortBy] = useState("NEWEST");
 
-  React.useEffect(() => {
+  // Refresh skeleton state — triggered after modal closes following a mutation
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const wasModalOpenRef = useRef(false);
+  const isModalOpen = selectedIdea !== null || showCreateModal;
+
+  useEffect(() => {
+    if (wasModalOpenRef.current && !isModalOpen) {
+      setIsRefreshing(true);
+      const timer = setTimeout(() => setIsRefreshing(false), 800);
+      return () => clearTimeout(timer);
+    }
+    wasModalOpenRef.current = isModalOpen;
+  }, [isModalOpen]);
+
+  useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Press 'N' to open the New Concept modal when no input is focused
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isModalOpen) return;
+      if (e.key !== "n" && e.key !== "N") return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      e.preventDefault();
+      setShowCreateModal(true);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen]);
 
   const formatDate = (dateStr: string) => {
     if (!mounted) return "";
@@ -38,7 +70,7 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
         month: "short",
         day: "numeric",
       });
-    } catch (e) {
+    } catch {
       return "";
     }
   };
@@ -263,9 +295,7 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
               <option value="Z_A">Z → A</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-muted">
-              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="m6 9 6 6 6-6" />
-              </svg>
+              <SelectChevron />
             </div>
           </div>
         </div>
@@ -288,97 +318,17 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
 
       {/* Expanded Filter Panel */}
       {showFilters && (
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 border border-edge rounded-xl bg-surface/30 animate-in slide-in-from-top-2 duration-200">
-          {/* Category Filter */}
-          <div className="space-y-1">
-            <label htmlFor="filter-category" className="block text-[9px] font-mono text-muted uppercase tracking-wider">
-              Category
-            </label>
-            <div className="relative">
-              <select
-                id="filter-category"
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full bg-background border border-edge rounded-lg px-2.5 py-1.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none cursor-pointer"
-              >
-                <option value="ALL">ALL CATEGORIES</option>
-                {availableCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-muted">
-                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Status Filter */}
-          <div className="space-y-1">
-            <label htmlFor="filter-status" className="block text-[9px] font-mono text-muted uppercase tracking-wider">
-              Status
-            </label>
-            <div className="relative">
-              <select
-                id="filter-status"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full bg-background border border-edge rounded-lg px-2.5 py-1.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none cursor-pointer"
-              >
-                <option value="ALL">ALL STATUSES</option>
-                <option value="BACKLOG">BACKLOG</option>
-                <option value="EVALUATING">EVALUATING</option>
-                <option value="DRAFTING">DRAFTING</option>
-                <option value="READY">READY</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-muted">
-                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Priority Filter */}
-          <div className="space-y-1">
-            <label htmlFor="filter-priority" className="block text-[9px] font-mono text-muted uppercase tracking-wider">
-              Priority
-            </label>
-            <div className="relative">
-              <select
-                id="filter-priority"
-                value={filterPriority}
-                onChange={(e) => setFilterPriority(e.target.value)}
-                className="w-full bg-background border border-edge rounded-lg px-2.5 py-1.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none cursor-pointer"
-              >
-                <option value="ALL">ALL PRIORITIES</option>
-                <option value="LOW">LOW</option>
-                <option value="MEDIUM">MEDIUM</option>
-                <option value="HIGH">HIGH</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-muted">
-                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Clear Button */}
-          <div className="flex items-end">
-            <button
-              type="button"
-              disabled={!isFilterActive}
-              onClick={resetFilters}
-              className="w-full py-1.5 rounded-lg border border-edge bg-transparent hover:bg-surface-2 text-xs text-muted hover:text-foreground font-semibold font-mono tracking-wider transition-all uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none"
-            >
-              CLEAR_ALL
-            </button>
-          </div>
-        </div>
+        <IdeaVaultFilters
+          filterCategory={filterCategory}
+          filterStatus={filterStatus}
+          filterPriority={filterPriority}
+          availableCategories={availableCategories}
+          isFilterActive={isFilterActive}
+          onCategoryChange={setFilterCategory}
+          onStatusChange={setFilterStatus}
+          onPriorityChange={setFilterPriority}
+          onClear={resetFilters}
+        />
       )}
 
       {/* Active Filter Banner */}
@@ -401,32 +351,102 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
       )}
 
       {/* Ideas Card List or Empty State */}
-      {sortedIdeas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 border border-edge rounded-xl bg-surface/30 text-center space-y-3 animate-in fade-in duration-200">
-          <div className="text-subtle font-mono text-[10px] uppercase tracking-wider">
-            SEARCH_RESULT_EMPTY
-          </div>
-          <p className="text-xs text-muted font-sans max-w-sm">
-            No matching ideas found for your current search criteria.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              resetFilters();
-              setSearchQuery("");
-            }}
-            className="px-3.5 py-1.5 rounded-lg border border-edge hover:bg-surface-2 text-xs text-foreground font-semibold transition-all cursor-pointer select-none"
-          >
-            Reset All Filters
-          </button>
+      {isRefreshing ? (
+        <div className="space-y-3 animate-pulse">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border border-edge rounded-xl bg-surface overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
+                <div className="space-y-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-20 rounded-md bg-edge" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-edge hidden sm:block" />
+                    <div className="h-3 w-24 rounded bg-edge" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 w-3/4 rounded bg-edge" />
+                    <div className="h-3 w-1/2 rounded bg-edge" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-6 self-start sm:self-center shrink-0">
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="h-2 w-8 rounded bg-edge" />
+                    <div className="h-3 w-12 rounded bg-edge" />
+                  </div>
+                  <div className="w-px h-8 bg-edge hidden sm:block" />
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="h-2 w-8 rounded bg-edge" />
+                    <div className="h-5 w-16 rounded-md bg-edge" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+      ) : sortedIdeas.length === 0 ? (
+        totalCount === 0 ? (
+          <div className="flex flex-col items-center justify-center p-12 border border-edge rounded-xl bg-surface/30 text-center space-y-4 animate-in fade-in duration-200">
+            <div className="w-12 h-12 rounded-full bg-accent/5 border border-accent/20 flex items-center justify-center text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1 .3 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                <path d="M9 18h6" />
+                <path d="M10 22h4" />
+              </svg>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-xs font-mono font-bold text-foreground uppercase tracking-widest">
+                VAULT_IS_EMPTY
+              </h3>
+              <p className="text-xs text-muted font-sans max-w-xs leading-relaxed">
+                No ideas yet. Capture your first concept to start building your content pipeline.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="px-4 py-2 rounded-lg bg-foreground hover:bg-[#ccc] text-background text-xs font-semibold font-sans transition-all cursor-pointer select-none flex items-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+              Create your first idea
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-12 border border-edge rounded-xl bg-surface/30 text-center space-y-4 animate-in fade-in duration-200">
+            <div className="w-12 h-12 rounded-full bg-surface-2 border border-edge flex items-center justify-center text-muted">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-xs font-mono font-bold text-foreground uppercase tracking-widest">
+                NO_MATCHING_IDEAS
+              </h3>
+              <p className="text-xs text-muted font-sans max-w-xs leading-relaxed">
+                No matching ideas found for your current search or filter criteria.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                resetFilters();
+                setSearchQuery("");
+              }}
+              className="px-4 py-2 rounded-lg border border-edge hover:bg-surface-2 text-xs text-foreground font-semibold transition-all cursor-pointer select-none"
+            >
+              Clear search and filters
+            </button>
+          </div>
+        )
       ) : (
         <div className="space-y-3">
           {sortedIdeas.map((idea) => (
             <Card
               key={idea.id}
               hoverable
-              className="group cursor-pointer"
+              className="group cursor-pointer hover:shadow-sm hover:bg-surface-2/30 transition-all duration-150"
               onClick={() => setSelectedIdea(idea)}
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -439,7 +459,7 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-foreground group-hover:text-accent transition-colors">
+                    <h3 className="text-sm font-bold text-foreground group-hover:text-accent transition-colors duration-150">
                       {idea.title}
                     </h3>
                     <p className="text-xs text-muted leading-relaxed mt-0.5 max-w-4xl">
@@ -455,9 +475,25 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
                     <div className="text-accent">{getScoreBlocks(idea.priority)}</div>
                   </div>
                   <div className="w-px h-8 bg-edge hidden sm:block" />
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-[9px] font-mono text-subtle">STATE</span>
-                    {getStatusBadge(idea.status)}
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[9px] font-mono text-subtle">STATE</span>
+                      {getStatusBadge(idea.status)}
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-edge-strong opacity-0 group-hover:opacity-100 transition-opacity duration-150 -ml-1"
+                    >
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -467,9 +503,12 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
       )}
 
       <CreateIdeaModal
-        isOpen={selectedIdea !== null}
+        isOpen={selectedIdea !== null || showCreateModal}
         initialIdea={selectedIdea}
-        onClose={() => setSelectedIdea(null)}
+        onClose={() => {
+          setSelectedIdea(null);
+          setShowCreateModal(false);
+        }}
       />
     </div>
   );
