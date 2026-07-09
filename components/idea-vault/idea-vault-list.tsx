@@ -22,6 +22,9 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [filterPriority, setFilterPriority] = useState("ALL");
 
+  // Sorting state
+  const [sortBy, setSortBy] = useState("NEWEST");
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
@@ -41,9 +44,10 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
   };
 
   const getScoreBlocks = (priority: string | null) => {
+    const p = priority?.toUpperCase() || "MEDIUM";
     let score = 2; // Default to Medium (2 bars)
-    if (priority === "LOW") score = 1;
-    if (priority === "HIGH") score = 3;
+    if (p === "LOW") score = 1;
+    if (p === "HIGH") score = 3;
 
     return (
       <span className="font-mono text-[10px] tracking-tight">
@@ -53,21 +57,39 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
     );
   };
 
+  const CATEGORY_VARIANTS = [
+    "accent",
+    "success",
+    "warning",
+    "danger",
+    "subtle",
+  ] as const;
+
   const getCategoryBadge = (cat: Idea["category"]) => {
-    switch (cat) {
+    const c = cat?.toUpperCase() || "";
+    switch (c) {
       case "TWITTER":
         return <Badge variant="subtle">TWITTER</Badge>;
       case "YOUTUBE":
         return <Badge variant="danger">YOUTUBE</Badge>;
       case "NEWSLETTER":
         return <Badge variant="accent">NEWSLETTER</Badge>;
-      default:
-        return <Badge variant="default">{cat || "UNKNOWN"}</Badge>;
+      default: {
+        if (!c) return <Badge variant="default">UNKNOWN</Badge>;
+        let hash = 0;
+        for (let i = 0; i < c.length; i++) {
+          hash = ((hash << 5) - hash + c.charCodeAt(i)) | 0;
+        }
+        const variant =
+          CATEGORY_VARIANTS[Math.abs(hash) % CATEGORY_VARIANTS.length];
+        return <Badge variant={variant}>{c}</Badge>;
+      }
     }
   };
 
   const getStatusBadge = (status: Idea["status"]) => {
-    switch (status) {
+    const s = status?.toUpperCase() || "";
+    switch (s) {
       case "EVALUATING":
         return <Badge variant="warning">EVALUATING</Badge>;
       case "DRAFTING":
@@ -77,14 +99,24 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
       case "BACKLOG":
         return <Badge variant="default">BACKLOG</Badge>;
       default:
-        return <Badge variant="default">{status}</Badge>;
+        return <Badge variant="default">{s}</Badge>;
     }
   };
 
   // Stats calculation based on total loaded ideas
   const totalCount = ideas.length;
-  const highPriorityCount = ideas.filter((idea) => idea.priority === "HIGH").length;
-  const readyCount = ideas.filter((idea) => idea.status === "READY").length;
+  const highPriorityCount = ideas.filter((idea) => (idea.priority?.toUpperCase() || "MEDIUM") === "HIGH").length;
+  const readyCount = ideas.filter((idea) => (idea.status?.toUpperCase() || "") === "READY").length;
+
+  // Derive available categories from loaded ideas
+  const availableCategories = Array.from(
+    new Set(
+      ideas
+        .map((idea) => idea.category)
+        .filter((c): c is string => Boolean(c))
+        .map((c) => c.toUpperCase())
+    )
+  ).sort();
 
   const isFilterActive =
     filterCategory !== "ALL" ||
@@ -110,17 +142,54 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
 
     // 2. Category Match
     const matchesCategory =
-      filterCategory === "ALL" ? true : idea.category === filterCategory;
+      filterCategory === "ALL"
+        ? true
+        : (idea.category?.toUpperCase() || "") === filterCategory;
 
     // 3. Status Match
     const matchesStatus =
-      filterStatus === "ALL" ? true : idea.status === filterStatus;
+      filterStatus === "ALL"
+        ? true
+        : (idea.status?.toUpperCase() || "") === filterStatus;
 
     // 4. Priority Match
     const matchesPriority =
-      filterPriority === "ALL" ? true : idea.priority === filterPriority;
+      filterPriority === "ALL"
+        ? true
+        : (idea.priority?.toUpperCase() || "MEDIUM") === filterPriority;
 
     return matchesSearch && matchesCategory && matchesStatus && matchesPriority;
+  });
+
+  // Sorting logic applied on top of filtered ideas list
+  const sortedIdeas = [...filteredIdeas].sort((a, b) => {
+    switch (sortBy) {
+      case "NEWEST":
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case "OLDEST":
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      case "PRIORITY": {
+        const getPriorityWeight = (p: string | null) => {
+          const priority = p?.toUpperCase() || "MEDIUM";
+          if (priority === "HIGH") return 3;
+          if (priority === "MEDIUM") return 2;
+          if (priority === "LOW") return 1;
+          return 0;
+        };
+        const weightA = getPriorityWeight(a.priority);
+        const weightB = getPriorityWeight(b.priority);
+        if (weightB !== weightA) {
+          return weightB - weightA;
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      case "A_Z":
+        return a.title.localeCompare(b.title);
+      case "Z_A":
+        return b.title.localeCompare(a.title);
+      default:
+        return 0;
+    }
   });
 
   return (
@@ -179,6 +248,26 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
               {isFilterActive ? "Filter (Active)" : "Filter"}
             </span>
           </button>
+
+          {/* Sort Dropdown */}
+          <div className="relative min-w-[100px]">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full bg-surface border border-edge rounded-lg px-2.5 py-1.5 pr-8 text-xs text-muted hover:text-foreground font-semibold appearance-none cursor-pointer focus:outline-none focus:border-edge-strong transition-colors"
+            >
+              <option value="NEWEST">Newest</option>
+              <option value="OLDEST">Oldest</option>
+              <option value="PRIORITY">Priority</option>
+              <option value="A_Z">A → Z</option>
+              <option value="Z_A">Z → A</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-muted">
+              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
+          </div>
         </div>
 
         {/* Dense Status Counts */}
@@ -213,9 +302,11 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
                 className="w-full bg-background border border-edge rounded-lg px-2.5 py-1.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none cursor-pointer"
               >
                 <option value="ALL">ALL CATEGORIES</option>
-                <option value="TWITTER">TWITTER</option>
-                <option value="YOUTUBE">YOUTUBE</option>
-                <option value="NEWSLETTER">NEWSLETTER</option>
+                {availableCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-muted">
                 <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -296,7 +387,7 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
             <span>
-              FILTERING ACTIVE (SHOWING {filteredIdeas.length} OF {totalCount})
+              FILTERING ACTIVE (SHOWING {sortedIdeas.length} OF {totalCount})
             </span>
           </div>
           <button
@@ -310,7 +401,7 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
       )}
 
       {/* Ideas Card List or Empty State */}
-      {filteredIdeas.length === 0 ? (
+      {sortedIdeas.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 border border-edge rounded-xl bg-surface/30 text-center space-y-3 animate-in fade-in duration-200">
           <div className="text-subtle font-mono text-[10px] uppercase tracking-wider">
             SEARCH_RESULT_EMPTY
@@ -331,7 +422,7 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredIdeas.map((idea) => (
+          {sortedIdeas.map((idea) => (
             <Card
               key={idea.id}
               hoverable
