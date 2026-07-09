@@ -14,11 +14,15 @@ interface IdeaVaultListProps {
 export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
 
-  const getScoreBlocks = (score: number) => {
+  const getScoreBlocks = (priority: string | null) => {
+    let score = 2; // Default to Medium (2 bars)
+    if (priority === "LOW") score = 1;
+    if (priority === "HIGH") score = 3;
+
     return (
       <span className="font-mono text-[10px] tracking-tight">
         {"■".repeat(score)}
-        <span className="text-edge-strong">{"■".repeat(5 - score)}</span>
+        <span className="text-edge-strong">{"■".repeat(3 - score)}</span>
       </span>
     );
   };
@@ -84,7 +88,7 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
               <div className="flex items-center gap-6 self-start sm:self-center shrink-0">
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-[9px] font-mono text-subtle">SIGNAL</span>
-                  <div className="text-accent">{getScoreBlocks(3)}</div>
+                  <div className="text-accent">{getScoreBlocks(idea.priority)}</div>
                 </div>
                 <div className="w-px h-8 bg-edge hidden sm:block" />
                 <div className="flex flex-col items-end gap-1">
