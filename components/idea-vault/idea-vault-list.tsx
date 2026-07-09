@@ -16,6 +16,12 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
 
+  // Filter selection states
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterCategory, setFilterCategory] = useState("ALL");
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [filterPriority, setFilterPriority] = useState("ALL");
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
@@ -80,14 +86,41 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
   const highPriorityCount = ideas.filter((idea) => idea.priority === "HIGH").length;
   const readyCount = ideas.filter((idea) => idea.status === "READY").length;
 
-  // Live filter based on case-insensitive search (Title, Content, or Category)
+  const isFilterActive =
+    filterCategory !== "ALL" ||
+    filterStatus !== "ALL" ||
+    filterPriority !== "ALL";
+
+  const resetFilters = () => {
+    setFilterCategory("ALL");
+    setFilterStatus("ALL");
+    setFilterPriority("ALL");
+  };
+
+  // Combined filtering based on case-insensitive search and metadata selections
   const filteredIdeas = ideas.filter((idea) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    const titleMatch = idea.title.toLowerCase().includes(query);
-    const contentMatch = idea.content?.toLowerCase().includes(query) || false;
-    const categoryMatch = idea.category?.toLowerCase().includes(query) || false;
-    return titleMatch || contentMatch || categoryMatch;
+    // 1. Search Match
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch = !query
+      ? true
+      : idea.title.toLowerCase().includes(query) ||
+        idea.content?.toLowerCase().includes(query) ||
+        idea.category?.toLowerCase().includes(query) ||
+        false;
+
+    // 2. Category Match
+    const matchesCategory =
+      filterCategory === "ALL" ? true : idea.category === filterCategory;
+
+    // 3. Status Match
+    const matchesStatus =
+      filterStatus === "ALL" ? true : idea.status === filterStatus;
+
+    // 4. Priority Match
+    const matchesPriority =
+      filterPriority === "ALL" ? true : idea.priority === filterPriority;
+
+    return matchesSearch && matchesCategory && matchesStatus && matchesPriority;
   });
 
   return (
@@ -106,12 +139,45 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
               placeholder="Search concepts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-surface border border-edge rounded-lg py-1.5 pl-8 pr-3 text-xs text-foreground placeholder-subtle focus:outline-none focus:border-edge-strong font-sans"
+              className="w-full bg-surface border border-edge rounded-lg py-1.5 pl-8 pr-10 text-xs text-foreground placeholder-subtle focus:outline-none focus:border-edge-strong font-sans"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-subtle hover:text-foreground p-0.5 rounded cursor-pointer transition-colors"
+                aria-label="Clear search"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
           </div>
-          <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-edge bg-surface hover:bg-surface-2 text-xs text-muted font-medium transition-all cursor-pointer">
-            <FilterIcon size={10} />
-            <span>Filter</span>
+          <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all cursor-pointer select-none ${
+              isFilterActive
+                ? "border-accent/20 bg-accent/5 text-accent hover:border-accent/40 hover:bg-accent/10"
+                : "border-edge bg-surface hover:bg-surface-2 text-muted hover:text-foreground"
+            }`}
+          >
+            <FilterIcon size={10} className={isFilterActive ? "text-accent" : "text-muted"} />
+            <span className="text-xs font-semibold">
+              {isFilterActive ? "Filter (Active)" : "Filter"}
+            </span>
           </button>
         </div>
 
@@ -131,15 +197,137 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
         </div>
       </div>
 
+      {/* Expanded Filter Panel */}
+      {showFilters && (
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 border border-edge rounded-xl bg-surface/30 animate-in slide-in-from-top-2 duration-200">
+          {/* Category Filter */}
+          <div className="space-y-1">
+            <label htmlFor="filter-category" className="block text-[9px] font-mono text-muted uppercase tracking-wider">
+              Category
+            </label>
+            <div className="relative">
+              <select
+                id="filter-category"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="w-full bg-background border border-edge rounded-lg px-2.5 py-1.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none cursor-pointer"
+              >
+                <option value="ALL">ALL CATEGORIES</option>
+                <option value="TWITTER">TWITTER</option>
+                <option value="YOUTUBE">YOUTUBE</option>
+                <option value="NEWSLETTER">NEWSLETTER</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Filter */}
+          <div className="space-y-1">
+            <label htmlFor="filter-status" className="block text-[9px] font-mono text-muted uppercase tracking-wider">
+              Status
+            </label>
+            <div className="relative">
+              <select
+                id="filter-status"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full bg-background border border-edge rounded-lg px-2.5 py-1.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none cursor-pointer"
+              >
+                <option value="ALL">ALL STATUSES</option>
+                <option value="BACKLOG">BACKLOG</option>
+                <option value="EVALUATING">EVALUATING</option>
+                <option value="DRAFTING">DRAFTING</option>
+                <option value="READY">READY</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Priority Filter */}
+          <div className="space-y-1">
+            <label htmlFor="filter-priority" className="block text-[9px] font-mono text-muted uppercase tracking-wider">
+              Priority
+            </label>
+            <div className="relative">
+              <select
+                id="filter-priority"
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value)}
+                className="w-full bg-background border border-edge rounded-lg px-2.5 py-1.5 pr-8 text-xs text-foreground focus:outline-none focus:border-muted font-sans appearance-none cursor-pointer"
+              >
+                <option value="ALL">ALL PRIORITIES</option>
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Clear Button */}
+          <div className="flex items-end">
+            <button
+              type="button"
+              disabled={!isFilterActive}
+              onClick={resetFilters}
+              className="w-full py-1.5 rounded-lg border border-edge bg-transparent hover:bg-surface-2 text-xs text-muted hover:text-foreground font-semibold font-mono tracking-wider transition-all uppercase cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none"
+            >
+              CLEAR_ALL
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Active Filter Banner */}
+      {isFilterActive && (
+        <div className="flex items-center justify-between px-1 text-[10px] font-mono text-muted select-none animate-in fade-in duration-200">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            <span>
+              FILTERING ACTIVE (SHOWING {filteredIdeas.length} OF {totalCount})
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="text-accent hover:text-accent/80 font-bold uppercase tracking-wider cursor-pointer transition-colors"
+          >
+            CLEAR_FILTERS
+          </button>
+        </div>
+      )}
+
       {/* Ideas Card List or Empty State */}
       {filteredIdeas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 border border-edge rounded-xl bg-surface/30 text-center space-y-2 animate-in fade-in duration-200">
+        <div className="flex flex-col items-center justify-center p-12 border border-edge rounded-xl bg-surface/30 text-center space-y-3 animate-in fade-in duration-200">
           <div className="text-subtle font-mono text-[10px] uppercase tracking-wider">
             SEARCH_RESULT_EMPTY
           </div>
-          <p className="text-xs text-muted font-sans">
-            No matching ideas found for "{searchQuery}".
+          <p className="text-xs text-muted font-sans max-w-sm">
+            No matching ideas found for your current search criteria.
           </p>
+          <button
+            type="button"
+            onClick={() => {
+              resetFilters();
+              setSearchQuery("");
+            }}
+            className="px-3.5 py-1.5 rounded-lg border border-edge hover:bg-surface-2 text-xs text-foreground font-semibold transition-all cursor-pointer select-none"
+          >
+            Reset All Filters
+          </button>
         </div>
       ) : (
         <div className="space-y-3">
