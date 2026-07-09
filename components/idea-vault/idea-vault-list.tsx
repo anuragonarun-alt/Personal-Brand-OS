@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { Idea } from "@/app/ideas/page";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { EyeIcon } from "@/components/ui/icons";
 import { CreateIdeaModal } from "./create-idea-modal";
 
 interface IdeaVaultListProps {
@@ -95,16 +94,6 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
                   <span className="text-[9px] font-mono text-subtle">STATE</span>
                   {getStatusBadge(idea.status)}
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedIdea(idea);
-                  }}
-                  className="p-1 rounded border border-edge hover:border-edge-strong bg-surface-2 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-                  aria-label="View concept details"
-                >
-                  <EyeIcon size={12} className="text-muted hover:text-foreground" />
-                </button>
               </div>
             </div>
           </Card>
