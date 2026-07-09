@@ -12,6 +12,25 @@ interface IdeaVaultListProps {
 
 export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const formatDate = (dateStr: string) => {
+    if (!mounted) return "";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch (e) {
+      return "";
+    }
+  };
 
   const getScoreBlocks = (priority: string | null) => {
     let score = 2; // Default to Medium (2 bars)
@@ -70,7 +89,7 @@ export const IdeaVaultList: React.FC<IdeaVaultListProps> = ({ ideas }) => {
                   {getCategoryBadge(idea.category)}
                   <span className="w-1.5 h-1.5 rounded-full bg-edge-strong hidden sm:inline" />
                   <span className="font-mono text-[10px] text-subtle">
-                    {new Date(idea.created_at).toLocaleDateString()}
+                    {formatDate(idea.created_at)}
                   </span>
                 </div>
                 <div>
